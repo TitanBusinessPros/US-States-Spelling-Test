@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US States Spelling Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .score-container, .progress-container {
+            text-align: center;
+        }
+        
+        .score, .progress {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 5px;
+            color: #FFD700;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .states-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .state-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .state-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .state-card.completed {
+            background: rgba(255, 165, 0, 0.3);
+            border-color: #FFA500;
+        }
+        
+        .state-abbr {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            border: 2px solid #FFD700;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #FFD700;
+        }
+        
+        #current-state {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #spelling-input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.2rem;
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1a2a6c;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        #spelling-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        #submit-spelling, #cancel-spelling {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        #submit-spelling {
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        #submit-spelling:hover {
+            background: linear-gradient(to bottom, #66BB6A, #388E3C);
+            transform: translateY(-2px);
+        }
+        
+        #cancel-spelling {
+            background: linear-gradient(to bottom, #f44336, #c62828);
+            color: white;
+        }
+        
+        #cancel-spelling:hover {
+            background: linear-gradient(to bottom, #ef5350, #d32f2f);
+            transform: translateY(-2px);
+        }
+        
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+            font-size: 1.1rem;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .correct {
+            color: #C8E6C9;
+            background: rgba(76, 175, 80, 0.3);
+        }
+        
+        .incorrect {
+            color: #FFCDD2;
+            background: rgba(244, 67, 54, 0.3);
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .states-container {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .state-abbr {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .states-container {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .state-abbr {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>US States Spelling Test</h1>
+            <div class="subtitle">Click on a state initial, spell its name correctly, and earn 100 points!</div>
+        </header>
+        
+        <div class="game-info">
+            <div class="score-container">
+                <div>Score</div>
+                <div class="score" id="score">0</div>
+            </div>
+            
+            <div class="progress-container">
+                <div>Progress</div>
+                <div class="progress" id="progress">0/50</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="states-container" id="states-container">
+            <!-- State cards will be generated by JavaScript -->
+        </div>
+        
+        <div class="modal" id="spelling-modal">
+            <div class="modal-content">
+                <h2>Spell the State</h2>
+                <div id="current-state">State Initial</div>
+                <input type="text" id="spelling-input" placeholder="Enter the full state name" autocomplete="off">
+                <div class="button-container">
+                    <button id="submit-spelling">Submit</button>
+                    <button id="cancel-spelling">Cancel</button>
+                </div>
+                <div class="message" id="spelling-message"></div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p>Click on any state initial to begin spelling. Type the full name of the state correctly to earn 100 points. Each state can only be spelled once. Try to complete all 50 states! This spelling test for our great country was created by Titan Business Pros LLC</p>
+        </div>
+    </div>
+
+    <script>
+        // State data - only storing abbreviations and full names
+        const states = [
+            { abbr: 'AL', name: 'Alabama' },
+            { abbr: 'AK', name: 'Alaska' },
+            { abbr: 'AZ', name: 'Arizona' },
+            { abbr: 'AR', name: 'Arkansas' },
+            { abbr: 'CA', name: 'California' },
+            { abbr: 'CO', name: 'Colorado' },
+            { abbr: 'CT', name: 'Connecticut' },
+            { abbr: 'DE', name: 'Delaware' },
+            { abbr: 'FL', name: 'Florida' },
+            { abbr: 'GA', name: 'Georgia' },
+            { abbr: 'HI', name: 'Hawaii' },
+            { abbr: 'ID', name: 'Idaho' },
+            { abbr: 'IL', name: 'Illinois' },
+            { abbr: 'IN', name: 'Indiana' },
+            { abbr: 'IA', name: 'Iowa' },
+            { abbr: 'KS', name: 'Kansas' },
+            { abbr: 'KY', name: 'Kentucky' },
+            { abbr: 'LA', name: 'Louisiana' },
+            { abbr: 'ME', name: 'Maine' },
+            { abbr: 'MD', name: 'Maryland' },
+            { abbr: 'MA', name: 'Massachusetts' },
+            { abbr: 'MI', name: 'Michigan' },
+            { abbr: 'MN', name: 'Minnesota' },
+            { abbr: 'MS', name: 'Mississippi' },
+            { abbr: 'MO', name: 'Missouri' },
+            { abbr: 'MT', name: 'Montana' },
+            { abbr: 'NE', name: 'Nebraska' },
+            { abbr: 'NV', name: 'Nevada' },
+            { abbr: 'NH', name: 'New Hampshire' },
+            { abbr: 'NJ', name: 'New Jersey' },
+            { abbr: 'NM', name: 'New Mexico' },
+            { abbr: 'NY', name: 'New York' },
+            { abbr: 'NC', name: 'North Carolina' },
+            { abbr: 'ND', name: 'North Dakota' },
+            { abbr: 'OH', name: 'Ohio' },
+            { abbr: 'OK', name: 'Oklahoma' },
+            { abbr: 'OR', name: 'Oregon' },
+            { abbr: 'PA', name: 'Pennsylvania' },
+            { abbr: 'RI', name: 'Rhode Island' },
+            { abbr: 'SC', name: 'South Carolina' },
+            { abbr: 'SD', name: 'South Dakota' },
+            { abbr: 'TN', name: 'Tennessee' },
+            { abbr: 'TX', name: 'Texas' },
+            { abbr: 'UT', name: 'Utah' },
+            { abbr: 'VT', name: 'Vermont' },
+            { abbr: 'VA', name: 'Virginia' },
+            { abbr: 'WA', name: 'Washington' },
+            { abbr: 'WV', name: 'West Virginia' },
+            { abbr: 'WI', name: 'Wisconsin' },
+            { abbr: 'WY', name: 'Wyoming' }
+        ];
+
+        // Game state
+        let score = 0;
+        let completedStates = new Set();
+        let currentState = null;
+        const totalStates = states.length;
+
+        // DOM elements
+        const scoreElement = document.getElementById('score');
+        const progressElement = document.getElementById('progress');
+        const progressFill = document.getElementById('progress-fill');
+        const statesContainer = document.getElementById('states-container');
+        const modal = document.getElementById('spelling-modal');
+        const currentStateElement = document.getElementById('current-state');
+        const spellingInput = document.getElementById('spelling-input');
+        const submitButton = document.getElementById('submit-spelling');
+        const cancelButton = document.getElementById('cancel-spelling');
+        const messageElement = document.getElementById('spelling-message');
+
+        // Initialize the game
+        function initGame() {
+            // Shuffle states for random order
+            const shuffledStates = [...states].sort(() => Math.random() - 0.5);
+            
+            // Create state cards with only initials
+            shuffledStates.forEach(state => {
+                const card = document.createElement('div');
+                card.className = 'state-card';
+                card.dataset.state = state.abbr;
+                
+                card.innerHTML = `
+                    <div class="state-abbr">${state.abbr}</div>
+                `;
+                
+                card.addEventListener('click', () => openSpellingModal(state));
+                statesContainer.appendChild(card);
+            });
+            
+            // Update progress display
+            updateProgress();
+        }
+
+        // Update progress display
+        function updateProgress() {
+            const completedCount = completedStates.size;
+            progressElement.textContent = `${completedCount}/${totalStates}`;
+            progressFill.style.width = `${(completedCount / totalStates) * 100}%`;
+        }
+
+        // Open spelling modal
+        function openSpellingModal(state) {
+            // Check if state is already completed
+            if (completedStates.has(state.abbr)) {
+                return;
+            }
+            
+            // Set current state and show modal
+            currentState = state;
+            currentStateElement.textContent = state.abbr;
+            spellingInput.value = '';
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            modal.style.display = 'flex';
+            spellingInput.focus();
+        }
+
+        // Submit spelling
+        function checkSpelling() {
+            const userInput = spellingInput.value.trim().toLowerCase();
+            const correctName = currentState.name.toLowerCase();
+            
+            if (userInput === correctName) {
+                // Correct spelling
+                messageElement.textContent = 'Correct! +100 points';
+                messageElement.className = 'message correct';
+                
+                // Update score
+                score += 100;
+                scoreElement.textContent = score;
+                
+                // Mark state as completed
+                completedStates.add(currentState.abbr);
+                const stateCard = document.querySelector(`.state-card[data-state="${currentState.abbr}"]`);
+                stateCard.classList.add('completed');
+                
+                // Update progress
+                updateProgress();
+                
+                // Close modal after a short delay
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    
+                    // Check if all states are completed
+                    if (completedStates.size === totalStates) {
+                        setTimeout(() => {
+                            alert(`Congratulations! You've spelled all 50 states correctly!\nFinal Score: ${score} points`);
+                        }, 500);
+                    }
+                }, 1500);
+            } else {
+                // Incorrect spelling
+                messageElement.textContent = 'Incorrect. Try again!';
+                messageElement.className = 'message incorrect';
+                spellingInput.value = '';
+                spellingInput.focus();
+            }
+        }
+
+        // Event listeners
+        submitButton.addEventListener('click', checkSpelling);
+        
+        spellingInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkSpelling();
+            }
+        });
+        
+        cancelButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
